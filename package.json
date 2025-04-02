@@ -10,8 +10,14 @@
     "test": "jest"
   },
   "dependencies": {
+    "@adobe/react-native-aepcore": "^7.0.0",
+    "@adobe/react-native-aepedge": "^7.0.0",
+    "@adobe/react-native-aepedgeconsent": "^7.0.0",
+    "@adobe/react-native-aepoptimize": "^7.0.0",
+    "expo-linear-gradient": "^14.0.2",
     "react": "19.0.0",
-    "react-native": "0.78.1"
+    "react-native": "0.78.1",
+    "react-native-swiper": "^1.6.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
