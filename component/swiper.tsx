@@ -19,7 +19,7 @@ const { width } = Dimensions.get("window");
 const SwiperComponent: React.FC<SwiperComponentProps> = ({ activityData }) => {
   return (
     <Swiper autoplay loop style={styles.swiper} dotColor="#CCCCCC" activeDotColor="#f09e1d">
-      {JSON.parse(activityData).activityData.map((item, index) => (
+      {JSON.parse(activityData).activityData.map((item:any, index:any) => (
         <View key={index} style={styles.slide}>
         <View
             colors={["rgba(0, 0, 0, 0.8)", "rgba(255, 255, 255, 0)"]}

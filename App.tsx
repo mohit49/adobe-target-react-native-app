@@ -14,6 +14,7 @@ import {
   Proposition,
   DecisionScope,
 } from "@adobe/react-native-aepoptimize";
+import TeaserText from "./component/teaserText";
 // language parameter
 
 
@@ -32,50 +33,66 @@ const images = [
 
 
 export default function Index() {
-  const [activityData , setActivityData] = useState(false);
+const [topBannerData , setTopBannerData] = useState(false);
+const [belowBanner , setBelowBannerData] = useState(false);
   Edge.getLocationHint().then(hint =>
-    console.log('AdobeExperienceSDK: location hint = ' + hint),
+  console.log('AdobeExperienceSDK: location hint = ' + hint),
 );
 Identity.getExperienceCloudId().then(experienceCloudId => console.log("AdobeExperienceSDK: Experience Cloud Id = " + experienceCloudId));
-
-   const [sdkInit , setSdkInit] = useState(false);
+const [sdkInit , setSdkInit] = useState(false);
 var ecid="testss";
 MobileCore.getLogLevel().then(level => console.log("AdobeExperienceSDK: Log Level = " + level));
 MobileCore.getSdkIdentities().then(identities => console.log("AdobeExperienceSDK: Identities = " + identities));
 Optimize.extensionVersion().then(newVersion => console.log("AdobeExperienceSDK: Optimize version: " + newVersion));
 // Define the initialization options
 const initOptions = {
-  appId: "8aea536f4a27/016374eb21a0/launch-4cfa6d4dff94-development", // optional
+  appId: "0e123c966ba7/547a0ff4594f/launch-be1f41cda2ea-development", // optional
  
 };
-var mboxName = "home-banner-test";
-const decisionScopeText = new DecisionScope(mboxName);
-var data = {
-  "__adobe": {
-    "target": {
-      "language": "en",
-      "profile.viewcount": 10
-    }
-  }
-};
-const decisionScopes = [
-  decisionScopeText
-];
-
 var clone = function(value:any) {
   return JSON.parse(JSON.stringify(value));
 };
 Optimize.extensionVersion().then(newVersion => console.log("AdobeExperienceSDK: Optimize version: " + newVersion));
-Optimize.clearCachedPropositions();
+
+function displayLocationTarget(propositions:any,scopeDetails:any) {
+  let offerJson = propositions.get(scopeDetails)?.items[0];
+  let proposition = propositions.get(scopeDetails);
+  let offer = new Offer(offerJson);
+  offer.displayed(proposition);
+}
+
+function tappedLocationTarget(propositions:any,scopeDetails:any) {
+  let offerJson = propositions.get(scopeDetails)?.items[0];
+  let proposition = propositions.get(scopeDetails);
+  let offer = new Offer(offerJson);
+  offer.tapped(proposition);
+} 
+
+function customClickTracking(propositions:any,scopeDetails:any,additionalData:any){
+  let offerJson = propositions.get(scopeDetails)?.items[0];
+  let proposition = propositions.get(scopeDetails);
+  let offer = new Offer(offerJson);
+  offer.generateTapInteractionXdm(proposition).then(
+    generateTapInteractionXdmValue => {
+      var generateTapInteractionXdmVal = generateTapInteractionXdmValue;
+      //console.log("AdobeExperienceSDK: generateTapInteractionXdm: " + JSON.stringify(generateTapInteractionXdmVal));
+      let experienceEventTargetTracking = new ExperienceEvent({xdmData: generateTapInteractionXdmVal, data: additionalData});
+      //console.log("AdobeExperienceSDK: experienceEventTargetTracking: " + JSON.stringify(experienceEventTargetTracking));
+      Edge.sendEvent(experienceEventTargetTracking).then((data) => {
+        console.log(data);
+        console.log('Experience event sent successfully');
+      }).catch((error) => {
+        console.error('Error sending experience event:', error);
+      });
+    }
+  );
+}
+
 useEffect(() => {
-  Optimize.clearCachedPropositions();
-console.log("Optimize Proposition called");
-const decisionScopeText = new DecisionScope("home-page-banner");
-
-const decisionScopes = [
-  decisionScopeText,
-
-];
+Optimize.clearCachedPropositions();
+const decisionScopeMainBanner = new DecisionScope("testMbox1");
+//const decisionMainScreenTeaserText = new DecisionScope("main_screen_below_banner_teaser");
+const decisionScopes = [decisionScopeMainBanner];
 async function fetchPropositions() {
   try {
     Optimize.onPropositionUpdate({
@@ -83,28 +100,51 @@ async function fetchPropositions() {
         //App logic using the updated proposition
         if (propositions) {
           //Response from Target
-          const targetResponse = JSON.stringify(propositions.get(decisionScopeText.getName())?.items[0].data.content);
- 
-          const activityId = JSON.parse(JSON.stringify(propositions.get(decisionScopeText.getName())?.scopeDetails)).activity.id;
-          console.log('activityId',activityId);
- 
-         
- 
-          const scopeTarget = JSON.parse(JSON.stringify(propositions.get(decisionScopeText.getName())?.scope));
-          console.log('scopeTarget',scopeTarget);
- 
-          const scopeDetails = JSON.parse(JSON.stringify(propositions.get(decisionScopeText.getName())?.scopeDetails));
-          console.log('scopeDetails',scopeDetails);
-         
-          const paseResp= JSON.parse(targetResponse)
-          const data = JSON.parse(paseResp);
-          const textContent = data.textContent;
-          setActivityData(paseResp)
-        
+          decisionScopes.forEach((decisionScope)=>{
+            const targetResponseRaw = propositions.get(decisionScope.getName()),
+            targetResponse = JSON.stringify(propositions.get(decisionScope.getName())?.items[0].data.content);
+            if(targetResponse) {
+              console.log(targetResponse)
+              const activityId = JSON.parse(JSON.stringify(propositions.get(decisionScope.getName())?.scopeDetails)).activity.id,
+            scopeTarget = JSON.parse(JSON.stringify(propositions.get(decisionScope.getName())?.scope)),
+            scopeDetails = JSON.parse(JSON.stringify(propositions.get(decisionScope.getName())?.scopeDetails)),
+            paseResp= JSON.parse(targetResponse),
+            data = JSON.parse(paseResp),
+            textContent = data.textContent;
+            console.log(scopeTarget + "target-scope-name")
+            if(scopeTarget == "main_screen_top_banner_with_text") {
+               // setting the activity data
+               console.log(targetResponseRaw);
+               console.log('activityId',activityId);
+               console.log('scopeTarget',scopeTarget);
+               console.log('scopeDetails',scopeDetails);
+               setTopBannerData(paseResp)
+           
+
+            }
+
+            if(scopeTarget == "main_screen_below_banner_teaser") {
+              console.log(targetResponseRaw);
+              console.log('activityId',activityId);
+              console.log('scopeTarget',scopeTarget);
+              console.log('scopeDetails',scopeDetails);
+              setBelowBannerData(paseResp)
+            }
+          
+            // send display call once the activity got rendered
+            displayLocationTarget(propositions,decisionScope.getName());
+            
+            
+            tappedLocationTarget(propositions,decisionScope.getName());
+            //Once clicked to track out of the box clicked mbox
+            let additionalData = {"__adobe":{"target":{"mboxCicked": 'rewards'}}};
+            customClickTracking(propositions,decisionScope.getName(),additionalData);
+            }
+          })
         }
       },
     });
-    Optimize.updatePropositions(decisionScopes, clone(null), clone(data));
+    Optimize.updatePropositions(decisionScopes, undefined, undefined);
 
   } catch (error) {
     console.error("Error fetching propositions:", error);
@@ -114,7 +154,7 @@ async function fetchPropositions() {
 // Call the function
 fetchPropositions();
   
-}, []);
+});
 
 // Initialize the SDK
 useEffect(() => {
@@ -138,9 +178,12 @@ useEffect(() => {
      
     </View>
       <View style={styles.container}>
-      {activityData &&  <SwiperComponent activityData={activityData} />}
+      {topBannerData &&  <SwiperComponent activityData={topBannerData} />}
       </View>
 
+      <View style={styles.containerTeaser} >
+      {belowBanner &&  <TeaserText activityData={belowBanner}/>}
+      </View>
       {/* Local Image */}
       <View style={styles.containerBt}>
         <Image source={ImageBanner} style={styles.image} />
@@ -180,6 +223,14 @@ const styles = StyleSheet.create({
     resizeMode: "contain", // Adjust resize mode as needed
   },
   containerBt: {
+    width: width,
+   
+    position: "relative",
+    padding: 0,
+        backgroundColor:"#2e4755"
+  
+  },
+  containerTeaser: {
     width: width,
    
     position: "relative",

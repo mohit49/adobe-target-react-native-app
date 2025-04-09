@@ -14,6 +14,7 @@
     "@adobe/react-native-aepedge": "^7.0.0",
     "@adobe/react-native-aepedgeconsent": "^7.0.0",
     "@adobe/react-native-aepoptimize": "^7.0.0",
+    "expo": "^52.0.42",
     "expo-linear-gradient": "^14.0.2",
     "react": "19.0.0",
     "react-native": "0.78.1",
