@@ -46,7 +46,7 @@ MobileCore.getSdkIdentities().then(identities => console.log("AdobeExperienceSDK
 Optimize.extensionVersion().then(newVersion => console.log("AdobeExperienceSDK: Optimize version: " + newVersion));
 // Define the initialization options
 const initOptions = {
-  appId: "0e123c966ba7/547a0ff4594f/launch-be1f41cda2ea-development", // optional
+  appId: "8aea536f4a27/016374eb21a0/launch-4cfa6d4dff94-development", // optional
  
 };
 var clone = function(value:any) {
@@ -90,9 +90,9 @@ function customClickTracking(propositions:any,scopeDetails:any,additionalData:an
 
 useEffect(() => {
 Optimize.clearCachedPropositions();
-const decisionScopeMainBanner = new DecisionScope("testMbox1");
-//const decisionMainScreenTeaserText = new DecisionScope("main_screen_below_banner_teaser");
-const decisionScopes = [decisionScopeMainBanner];
+const decisionScopeMainBanner = new DecisionScope("main_screen_top_banner_with_text");
+const decisionMainScreenTeaserText = new DecisionScope("main_screen_below_banner_teaser");
+const decisionScopes = [decisionScopeMainBanner, decisionMainScreenTeaserText];
 async function fetchPropositions() {
   try {
     Optimize.onPropositionUpdate({
